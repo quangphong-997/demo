@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Xíu Xiu Store</title>
+<style>
+/* Reset margins and paddings */
+body, html {
+  margin: 0; padding: 0;
+  font-family: Arial, sans-serif;
+  background: #fffdfc;
+}
+
+header {
+  background: #ffcccb;
+  color: #333;
+  text-align: center;
+  padding: 20px 10px;
+  position: relative;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+#cart-icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+#cart-icon span {
+  margin-left: 5px;
+}
+
+.product-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+.product {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin: 10px;
+  width: 260px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.product img {
+  width: 100%;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  cursor: pointer;
+}
+.product h2 {
+  font-size: 1.2em;
+  margin: 10px 0 5px;
+}
+.product p {
+  margin: 5px 10px;
+  color: #555;
+}
+.price {
+  font-size: 1.1em;
+  color: #E91E63;
+  margin: 10px 0;
+}
+
+/* Modal */
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 2; 
+  left: 0; top: 0;
+  width: 100%; height: 100%; 
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+.modal-content {
+  background: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+}
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.close:hover, .close:focus {
+  color: #000;
+}
+.modal-content img {
+  width: 100%;
+  border-radius: 5px;
+}
+.modal-content h2 {
+  margin-top: 15px;
+  color: #E91E63;
+}
+.modal-content p {
+  margin: 10px 0;
+  color: #333;
+}
+
+/* Size options */
+#modalSizes {
+  margin: 15px 0;
+}
+#modalSizes label {
+  display: block;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+#modalSizes input[type="radio"] {
+  margin-right: 10px;
+}
+
+.modal-content button {
+  background: #E91E63;
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  margin: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+}
+.modal-content button:hover {
+  background: #d81b60;
+}
+
+#cartItems table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#cartItems th, #cartItems td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+#cartItems th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+#checkoutBtn {
+  background: #4CAF50;
+  margin-top: 15px;
+}
+#checkoutBtn:hover {
+  background: #45a049;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .product {
+    width: 90%;
+    margin: 10px auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Xíu Xiu Store</h1>
+  <div id="cart-icon">🛒 Giỏ hàng (<span id="cart-count">0</span>)</div>
+</header>
+
+<div class="product-list">
+  <div class="product">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2wbV2AAAAA3NCSVQICAjb4U/gAAAEY0lEQVR4nO3bX0gcRRzH8V+V0fdWFGWDGInFmkjBl5ZkBkGpyWwYWbKjAgEIyeJ1MamhhYUxDBmhmTXasGyhhgoEVkQxO+TWDP1df1ExQ02fWNaX6/V+ef/y3s9IwOBGBuFQBAhYIQQQhgFAQhBBBCEoVkRCBBEEEIIUSLGQ4BEIIIUSIGGIQSUjCGIYSKX+LN/x+fy6urKiXPN7t1765u/rLNLQ2Pbnt+b4K+vV6/n17ZvH37l2n+/uF8z5w7XI3A3s8BFeAHGg9t73gmYt1PT3/fodBDt73wFfAA4C/GaASMBgAOgfXr/oYg4wH0ENAN4P4cIYUg1gTfAKl8WgKIGZIgTQGeGmC7qBpEk4GUAk8F/I+AfAz16o0JwC+AGi8BAB+LGwSAVAY0s4AOFPg3AHooEHgZ8BzgTZQC+U8DfVZNBIGVAx0GEwGsDvV4GB3Ah8Bz0BsCYgQcBrAGgJLjj3X2F4KICx/F99VyDOx44BsMHSf4P2ASQ6IMn0hBAwtIMECPw9lCOCEYj7SIYwRCE4ghhFCKIIYRQhDSHIRhECKIRIYgiBEIoYIRQpwjCqzxYYmhXJrEhFRh4BT/ahJXmAgL3gpJVhEAhEogSRFCEIokERCAwQYghhAhRCEIbBRDCGIICYRxBCGIISKMQYghCSKEUQkCBGIIYQCEUQghhAkghhBCEEEIUQghxChmAIIQpkjIRhHCGIICIGFIGAEGISiFSIGIISIIDAHEDBicWB/5xD/3MSe23HAOpK/uBuq+sBkB1+vjMC+hd52nOQQ8Bn4MDV0XPMiJHgjv6+ljZcDcyIXaGXi6xgphXRX4iNEmET0YUCSIIYSCCIIYSACEUQghhAjkIIUSCIJhIhZCeCEIIUSCIYRRCKIIYQkghhAhhEgihhBCEIYkghhAChFECGGIIgkghhAhhEAhBCGIIYQI5CCFIICISCEIIYQCETzIvy7nL3K9ooftdJGMAAAAAElFTkSuQmCC" alt="Product 1" onclick="openModal(0)">
+    <h2>Đồ chơi thú nhồi bông</h2>
+    <p>Thú nhồi bông mềm mại cho bé yêu.</p>
+    <p class="price">199,000₫</p>
+  </div>
+  <div class="product">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2wbV2AAAAA3NCSVQICAjb4U/gAAAEa0lEQVR4nO3bX0gcRRzH8V+V0fdWFGWDGInFmkjBl5ZkBkGpyWwYWbKjAgEIyeJ1MamhhYUxDBmhmTXasGyhhgoEVkQxO+TWDP1df1ExQ02fWNaX6/V+ef/y3s9IwOBGBuFQBAhYIQQQhgFAQhBBBCEoVkRCBBEEEIIUSLGQ4BEIIIUSIGGIQSUjCGIYSKX+LN/x+fy6urKiXPN7t1765u/rLNLQ2Pbnt+b4K+vV6/n17ZvH37l2n+/uF8z5w7XI3A3s8BFeAHGg9t73gmYt1PT3/fodBDt73wFfAA4C/GaASMBgAOgfXr/oYg4wH0ENAN4P4cIYUg1gTfAKl8WgKIGZIgTQGeGmC7qBpEk4GUAk8F/I+AfAz16o0JwC+AGi8BAB+LGwSAVAY0s4AOFPg3AHooEHgZ8BzgTZQC+U8DfVZNBIGVAx0GEwGsDvV4GB3Ah8Bz0BsCYgQcBrAGgJLjj3X2F4KICx/F99VyDOx44BsMHSf4P2ASQ6IMn0hBAwtIMECPw9lCOCEYj7SIYwRCE4ghhFCKIIYRQhDSHIRhECKIRIYgiBEIoYIRQpwjCqzxYYmhXJrEhFRh4BT/ahJXmAgL3gpJVhEAhEogSRFCEIokERCAwQYghhAhRCEIbBRDCGIICYRxBCGIISKMQYghCSKEUQkCBGIIYQCEUQghhAkghhBCEEEIUQghxChmAIIQpkjIRhHCGIICIGFIGAEGISiFSIGIISIIDAHEDBicWB/5xD/3MSe23HAOpK/uBuq+sBkB1+vjMC+hd52nOQQ8Bn4MDV0XPMiJHgjv6+ljZcDcyIXaGXi6xgphXRX4iNEmET0YUCSIIYSCCIIYSACEUQghhAjkIIUSCIJhIhZCeCEIIUSCIYRRCKIIYQkghhAhhEgihhBCEIYkghhAChFECGGIIgkghhAhhEAhBCGIIYQI5CCFIICISCEIIYQCETzIvy7nL3K9ooftdJGMAAAAAElFTkSuQmCC" alt="Product 2" onclick="openModal(1)">
+    <h2>Quần áo sơ sinh</h2>
+    <p>Set quần áo cotton dịu mát cho bé.</p>
+    <p class="price">299,000₫</p>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div id="productModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeProductModal">&times;</span>
+    <img id="modalImage" src="" alt="Chi tiết sản phẩm">
+    <h2 id="modalName">Tên sản phẩm</h2>
+    <p id="modalDetail">Mô tả chi tiết sản phẩm.</p>
+    <div id="modalSizes">
+      <label><input type="radio" name="size" value="4\u20136kg"> Size 1 (4\u20136kg)</label>
+      <label><input type="radio" name="size" value="6\u20138kg"> Size 2 (6\u20138kg)</label>
+      <label><input type="radio" name="size" value="8\u201310kg"> Size 3 (8\u201310kg)</label>
+      <label><input type="radio" name="size" value="10\u201312kg"> Size 4 (10\u201312kg)</label>
+    </div>
+    <button id="buyNowBtn">Mua ngay</button>
+    <button id="addCartBtn">Thêm vào giỏ hàng</button>
+  </div>
+</div>
+
+<!-- Cart Modal -->
+<div id="cartModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeCartModal">&times;</span>
+    <h2>Giỏ hàng</h2>
+    <div id="cartItems"></div>
+    <button id="checkoutBtn">Thanh toán</button>
+  </div>
+</div>
+
+<script>
+const products = [
+  {
+    name: "Đồ chơi thú nhồi bông",
+    detail: "Thú nhồi bông mềm mại, an toàn cho bé chơi mỗi ngày.",
+    price: 199000,
+    img: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAJYCAYAAABjFvDZAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAIxJREFUeJzt3QsQ0AIAwEA4Y/azdjRhEaaKHRJrP5Sc5vg15vtfr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vraEN+QAhYAkvJSAAAAABJRU5ErkJggg=="
+  },
+  {
+    name: "Quần áo sơ sinh",
+    detail: "Bộ quần áo cotton cho bé, thoáng mát, dễ thương.",
+    price: 299000,
+    img: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAJYCAYAAABjFvDZAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAHxJREFUeJzt3QsoRgEQBNAQCrCNxNNC/jJp5/sZfW73XtdRHswQCCEPq7KQAAAEDxPBxI9P5fvf7/f3W0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tL/AwDXfAO1sDF16AAAAAElFTkSuQmCC"
+  }
+];
+
+let cart = [];
+
+// Open product modal
+function openModal(index) {
+  const product = products[index];
+  document.getElementById('modalImage').src = product.img;
+  document.getElementById('modalName').innerText = product.name;
+  document.getElementById('modalDetail').innerText = product.detail;
+  // select first size by default
+  document.querySelector('input[name="size"][value="4\u20136kg"]').checked = true;
+  document.getElementById('productModal').style.display = 'block';
+  // store current product index
+  document.getElementById('addCartBtn').dataset.productIndex = index;
+}
+
+// Close modals
+document.getElementById('closeProductModal').onclick = function() {
+  document.getElementById('productModal').style.display = 'none';
+};
+document.getElementById('closeCartModal').onclick = function() {
+  document.getElementById('cartModal').style.display = 'none';
+};
+// Close when clicking outside
+window.onclick = function(event) {
+  if (event.target == document.getElementById('productModal')) {
+    document.getElementById('productModal').style.display = 'none';
+  }
+  if (event.target == document.getElementById('cartModal')) {
+    document.getElementById('cartModal').style.display = 'none';
+  }
+}
+
+// Add to cart
+document.getElementById('addCartBtn').onclick = function() {
+  const idx = parseInt(this.dataset.productIndex);
+  const size = document.querySelector('input[name="size"]:checked').value;
+  // check if already in cart with same size
+  let item = cart.find(i => i.index === idx && i.size === size);
+  if (item) {
+    item.quantity += 1;
+  } else {
+    cart.push({ index: idx, name: products[idx].name, size: size, price: products[idx].price, quantity: 1 });
+  }
+  alert("Đã thêm vào giỏ hàng!");
+  updateCartCount();
+}
+
+// Buy now
+document.getElementById('buyNowBtn').onclick = function() {
+  alert("Cảm ơn bạn! Tính năng thanh toán đã được mô phỏng.");
+}
+
+// Open cart modal
+document.getElementById('cart-icon').onclick = function() {
+  updateCartDisplay();
+  document.getElementById('cartModal').style.display = 'block';
+}
+
+// Update cart count
+function updateCartCount() {
+  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+  document.getElementById('cart-count').innerText = count;
+}
+
+// Update cart display
+function updateCartDisplay() {
+  let html = "";
+  if (cart.length === 0) {
+    html = "<p>Giỏ hàng trống.</p>";
+  } else {
+    html = `<table>
+      <tr>
+        <th>Sản phẩm</th><th>Size</th><th>Số lượng</th><th>Giá</th><th>Thao tác</th>
+      </tr>`;
+    cart.forEach((item, idx) => {
+      html += `<tr>
+        <td>${item.name}</td>
+        <td>${item.size}</td>
+        <td>${item.quantity}</td>
+        <td>${item.price * item.quantity}₫</td>
+        <td><button onclick="removeFromCart(${idx})">Xóa</button></td>
+      </tr>`;
+    });
+    html += `</table>`;
+  }
+  document.getElementById('cartItems').innerHTML = html;
+  updateCartCount();
+}
+
+// Remove item
+function removeFromCart(i) {
+  cart.splice(i, 1);
+  updateCartDisplay();
+}
+
+// Checkout
+document.getElementById('checkoutBtn').onclick = function() {
+  if (cart.length === 0) {
+    alert("Giỏ hàng trống!");
+  } else {
+    alert("Cảm ơn bạn đã mua hàng! (Thanh toán được mô phỏng)");
+    cart = [];
+    updateCartDisplay();
+  }
+}
+</script>
+
+</body>
+</html>
